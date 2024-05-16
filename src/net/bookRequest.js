@@ -24,6 +24,23 @@ export function deleteFile(data){
   })
 }
 
+export function uploadTxt(data){
+  return request({
+    url:'/uploadTxt',
+    method:'post',
+    data,
+    headers:{'Content-Type':'multipart/form-data'}
+  })
+}
+
+export function deleteTxt(data){
+  return request({
+    url:'/deleteTxt',
+    method:'post',
+    data,
+    headers:{'Content-Type':'multipart/form-data'}
+  })
+}
 export function deleteBook(data){
   return request({
     url:'/book/'+data,
@@ -39,7 +56,7 @@ export function updateBook(data){
   })
 }
 
-export function selectAll(data){
+export function selectAllBook(data){
   return request({
     url:'/book',
     method:'patch',
@@ -54,3 +71,25 @@ export function selectById(params){
     params
   })
 }
+export function getBookDetails(data){
+  return request({
+    url:'/bookItem',
+    method:'post',
+    data
+  })
+}
+
+export function getBookFile(data){
+  return request({
+    url:'/readFile',
+    method:'post',
+    data
+  })
+}
+// export function selectBookById(data){
+//   return request({
+//     url:'/bookById',
+//     method:'post',
+//     data
+//   })
+// }

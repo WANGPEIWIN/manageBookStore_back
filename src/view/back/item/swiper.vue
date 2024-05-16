@@ -1,30 +1,31 @@
 <template>
   <div style="width: 100%;">
-    <div style="line-height: 100px;">
-      <div style="font-size: 30px;font-weight: bold;text-align: center">轮播图管理</div>
-    </div>
-    <div style="width: 90%;height: 260px;margin: 0 auto;border-radius: 1em;box-shadow: 0 0 10px rgba(128,128,128,0.62)">
-      <div style="width: 92%;margin: 0 auto;">
-        <div style="font-weight: bold;font-size: 18px;line-height: 60px">筛选:</div>
-          <div style="display: flex;width: 800px;justify-content: space-between">
-            <div style="width: 380px;">
-              <div style="height: 40px">标题:</div><el-input placeholder="请输入标题" v-model="search.title"></el-input>
-            </div>
-          </div>
-          <div style="display: flex;margin: 20px 0;justify-content: right">
-            <div @click=""><el-button type="primary" @click="selectTitle()">搜索</el-button></div>
-            <div style="display: flex;justify-content: right;margin: 0 10px"> <el-button type="success"  @click="dialogFormVisible = true;beforeAdd()">新增</el-button></div>
-            <div> <el-button type="info"  @click="emptyTitle()">清空</el-button></div>
-          </div>
+    <search-plant>
+      <div slot="inputName">
+        标题:
       </div>
-    </div>
-    <div style="border-radius: 1em;box-shadow: 0 0 10px rgba(128,128,128,0.62);width: 90%;height: auto;margin:60px auto;">
+      <div slot="input">
+        <input  v-model="search.title" class="superInput" placeholder="请输入标题"></input>
+      </div>
+      <div slot="button" style="display: flex">
+        <button-collection>
+          <div slot="check" @click="selectTitle()" >搜索</div>
+          <div slot="modify"  @click="beforeAdd();dialogFormVisible = true">新增</div>
+          <div slot="delete"  @click="emptyTitle()">清空</div>
+        </button-collection>
+      </div>
+    </search-plant>
+    <div style="border-radius: 1em;box-shadow: 0 0 10px rgba(128,128,128,0.62);width: 99%;height: auto;margin:10px auto;">
       <el-table
         :data="swiperInform"
         style="width: 100%;border-radius: 1em;">
         <el-table-column
           prop="title"
           label="标题">
+        </el-table-column>
+        <el-table-column
+          prop="bookName"
+          label="小说">
         </el-table-column>
         <el-table-column
           prop="imgUrl"
@@ -43,14 +44,10 @@
         </el-table-column>
         <el-table-column label="操作" width="200px" >
           <template slot-scope="scope" >
-            <div style="height: 60px;margin-top: 32px;">
-              <el-button-group>
-                <el-button icon="el-icon-edit" @click="beforeUpd(scope.row.id);dialogFormVisible = true"></el-button>
-                <el-button
-                  icon="el-icon-delete"
-                  type="danger" @click="deleteSwiper(scope.row.id)"></el-button>
-              </el-button-group>
-            </div>
+            <button-collection>
+              <div slot="modify" @click="beforeUpd(scope.row.id);dialogFormVisible = true">修改</div>
+              <div slot="delete" @click="deleteSwiper(scope.row.id)">删除</div>
+            </button-collection>
           </template>
         </el-table-column>
       </el-table>
@@ -97,6 +94,12 @@
                         :rules="[{ required: true, message: '请输入概述', trigger: 'blur' }]">
             <el-input v-model="form.explains" placeholder="请输入内容" style="margin: 10px 0;"></el-input>
           </el-form-item>
+          <el-form-item label="书籍信息:"
+                        :rules="[{ required: true, message: '请选择权限', trigger: 'blur'}]">
+            <el-select v-model="form.bookId" placeholder="请选择书籍信息" style="margin: 0 10px">
+              <el-option v-for="(item,index) in book " :label="item.bookName" :value="item.id" :key="item.id"></el-option>
+            </el-select>
+          </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogFormVisible = false">取 消</el-button>
@@ -108,11 +111,14 @@
 </template>
 
 <script>
-import {addSwiper, deleteSwiper, selectAll, selectById, updateSwiper} from "../net/swiperRequest";
-import {deleteFile, uploadImg} from "../net/bookRequest";
+import {addSwiper, deleteSwiper, selectAll, selectById, updateSwiper} from "../../../net/swiperRequest";
+import {deleteFile, selectAllBook, uploadImg} from "../../../net/bookRequest";
+import SearchPlant from "../../../components/contant/searchPlant.vue";
+import buttonCollection from "../../../components/contant/button/buttonCollection.vue";
 
 export default {
   name: "swiper",
+  components: {SearchPlant,buttonCollection},
   data(){
     return{
       isUpload:false,
@@ -122,7 +128,9 @@ export default {
         title:'',
         imgUrl:'',
         explains:'',
+        bookId:'',
       },
+      book:'',
       search:{
         title:''
       },
@@ -139,6 +147,9 @@ export default {
       if(show.code==="200"){
         this.swiperInform=show.data;
       }
+    },
+    async getBook(){
+     this.book= (await selectAllBook({})).data;
     },
     async dialogDisappear(){
       if(this.isUpload){
@@ -191,12 +202,14 @@ export default {
       this.$store.commit("tip",del);
     },
     async beforeUpd(id){
+      await this.getBook();
       this.form=(await selectById(id)).data;
       let oldImg=this.form.imgUrl;
       this.upd=false;
       this.imgUrlUpdate=true;
     },
     async beforeAdd(){
+      await this.getBook();
       this.form={
         title:'',
           imgUrl:'',
@@ -205,7 +218,7 @@ export default {
       this.upd=true;
     },
     async updSwiper(){
-      await updateSwiper(this.form)
+      this.swiperInform=(await updateSwiper(this.form)).data;
     },
     operateSwiper() {//按钮当前流程控制器
       if (this.upd) {

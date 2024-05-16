@@ -1,39 +1,40 @@
 <template>
   <div style="width: 100%">
       <div style="width: 100%;">
-        <div style="line-height: 100px;">
-          <div style="font-size: 30px;font-weight: bold;text-align: center">分类管理</div>
-        </div>
-        <div style="width: 90%;height: 260px;margin: 0 auto;border-radius: 1em;box-shadow: 0 0 10px rgba(128,128,128,0.62)">
-          <div style="width: 92%;margin: 0 auto;">
-            <div style="font-weight: bold;font-size: 18px;line-height: 60px">筛选:</div>
-            <div style="display: flex;width: 800px;justify-content: space-between">
-              <div style="width: 380px;">
-                <div style="height: 40px">分类名:</div><el-input v-model="search.classicName" placeholder="请输入分类名"></el-input>
-              </div>
-            </div>
-            <div style="display: flex;margin: 20px 0;justify-content: right">
-              <div @click="showClassic()"><el-button type="primary">搜索</el-button></div>
-              <div style="margin: 0 20px;"> <el-button type="success"  @click="addBefore();dialogFormVisible = true">新增</el-button></div>
-              <div><el-button type="info" @click="emptySearch()">清空</el-button></div>
-            </div>
+        <search-plant>
+          <div slot="inputName">
+            标签名:
           </div>
-        </div>
-        <div style="border-radius: 1em;box-shadow: 0 0 10px rgba(128,128,128,0.62);width: 90%;height: auto;margin:60px auto;">
+          <div slot="input">
+            <input  v-model="search.classicName" class="superInput" placeholder="请输入标签名"></input>
+          </div>
+          <div slot="button" style="display: flex">
+            <button-collection>
+              <div slot="check" @click="showClassic()" >搜索</div>
+              <div slot="modify"  @click="addBefore();dialogFormVisible = true">新增</div>
+              <div slot="delete"  @click="emptySearch()">清空</div>
+            </button-collection>
+          </div>
+        </search-plant>
+        <div style="border-radius: 1em;box-shadow: 0 0 10px rgba(128,128,128,0.62);width: 99%;height: auto;margin:10px auto;">
           <el-table
             :data="classicInform"
             style="width: 100%;border-radius: 1em;">
             <el-table-column
               prop="classicName"
-              label="分类名">
+              label="标签名">
             </el-table-column>
-            <el-table-column
-              prop="imgUrl"
-              label="图片">
-              <template slot-scope="scope" >
-                <img :src="(scope.row.imgUrl)" style="height: 120px">
-              </template>
-            </el-table-column>
+<!--            <el-table-column-->
+<!--              prop="classicItemId"-->
+<!--              label="分类详情">-->
+<!--            </el-table-column>-->
+<!--            <el-table-column-->
+<!--              prop="imgUrl"-->
+<!--              label="图片">-->
+<!--              <template slot-scope="scope" >-->
+<!--                <img :src="(scope.row.imgUrl)" style="height: 120px">-->
+<!--              </template>-->
+<!--            </el-table-column>-->
             <el-table-column
               prop="createTime"
               label="注册时间">
@@ -44,15 +45,20 @@
             </el-table-column>
             <el-table-column label="操作" width="200px" >
               <template slot-scope="scope" >
-                <div style="height: 60px;margin-top: 32px;">
-                  <el-button-group>
-                    <el-button
-                      icon="el-icon-edit"  @click="updBefore(scope.row.id);dialogFormVisible = true"></el-button>
-                    <el-button
-                      icon="el-icon-delete"
-                      type="danger" @click="deleteClassic(scope.row.id)"></el-button>
-                  </el-button-group>
-                </div>
+                <button-collection>
+                  <div slot="modify" @click="updBefore(scope.row.id);dialogFormVisible = true">修改</div>
+                  <div slot="delete" @click="deleteClassic(scope.row.id)">删除</div>
+                  <div slot="check"></div>
+                </button-collection>
+<!--                <div style="height: 60px;margin-top: 32px;">-->
+<!--                  <el-button-group>-->
+<!--                    <el-button-->
+<!--                      icon="el-icon-edit"  @click="updBefore(scope.row.id);dialogFormVisible = true"></el-button>-->
+<!--                    <el-button-->
+<!--                      icon="el-icon-delete"-->
+<!--                      type="danger" @click="deleteClassic(scope.row.id)"></el-button>-->
+<!--                  </el-button-group>-->
+<!--                </div>-->
               </template>
             </el-table-column>
           </el-table>
@@ -65,6 +71,17 @@
                             :rules="[{ required: true, message: '请输入分类名', trigger: 'blur' }]">
                 <el-input v-model="form.classicName" placeholder="请输入内容" style="margin: 10px 0;"></el-input>
               </el-form-item>
+<!--              <el-form-item label="所属分类:"-->
+<!--                            :rules="[{ required: true, message: '请输入分类名', trigger: 'blur' }]">-->
+<!--                <el-select v-model="form.classicItemId"  placeholder="请选择">-->
+<!--                  <el-option-->
+<!--                    v-for="item in classicItem"-->
+<!--                    :key="item.id"-->
+<!--                    :label="item.classicNames"-->
+<!--                    :value="item.id">-->
+<!--                  </el-option>-->
+<!--                </el-select>-->
+<!--              </el-form-item>-->
               <el-form-item label="图片:">
                 <div v-if="form.imgUrl===''">
                   <el-upload
@@ -108,13 +125,16 @@
 
 <script>
 
-import {addClassic, classicSelectAll, deleteClassic, selectById, updateClassic} from "../net/classicRequest";
-import TitleItem from "../components/contant/titleItem/titleItem";
-import {deleteFile, uploadImg} from "../net/bookRequest";
+import {addClassic, classicSelectAll, deleteClassic, selectById, updateClassic} from "../../../net/classicRequest";
+import TitleItem from "../../../components/contant/titleItem/titleItem.vue";
+import {deleteFile, uploadImg} from "../../../net/bookRequest";
+import {classicItemSelectAll} from "../../../net/classicItemRequest";
+import searchPlant from "../../../components/contant/searchPlant.vue";
+import buttonCollection from "../../../components/contant/button/buttonCollection.vue";
 
 export default {
   name: "homeItem",
-  components: {TitleItem},
+  components: {TitleItem,searchPlant,buttonCollection},
   data(){
     return{
       imgUrlUpdate:false,
@@ -123,8 +143,10 @@ export default {
       isAdd:true,
       classicInform:null,
       formLabelWidth: '120px',
+      classicItem:'',
       form:{
         classicName:'',
+        classicItemId:'',
         imgUrl:'',
       },
       search:{
@@ -187,7 +209,7 @@ export default {
       this.isAdd=false;
       this.imgUrlUpdate=true;
     },
-    addBefore(){
+    async addBefore(){
       //清空表单
       this.form={
         classicName:'',
@@ -195,6 +217,8 @@ export default {
       };
       //修改当前状态为添加
       this.isAdd=true;
+      // this.classicItem=(await classicItemSelectAll({})).data;
+      // console.log(this.classicItem);
     },
     verify(){
       let res={

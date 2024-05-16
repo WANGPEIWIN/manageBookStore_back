@@ -2,32 +2,33 @@
   <div style="width: 100%;height: 649px;display: flex">
     <div style="width: 100%;">
       <div style="line-height: 100px;">
-        <div style="font-size: 30px;font-weight: bold;text-align: center">用户管理</div>
       </div>
-      <div style="width: 90%;height: 260px;margin: 0 auto;border-radius: 1em;box-shadow: 0 0 10px rgba(128,128,128,0.62)">
-        <div style="width: 92%;margin: 0 auto;">
-          <div style="font-weight: bold;font-size: 18px;line-height: 60px">筛选:</div>
-          <div style="display: flex;width: 800px;justify-content: space-between">
-            <div style="width: 380px;">
-              <div style="height: 40px">用户名:</div><el-input v-model="search.userName" placeholder="请输入姓名"></el-input>
-            </div>
-            <div style="margin: 0 70px ">
-              <div style="height: 40px">权限:</div>
-              <el-select v-model="search.role" placeholder="请选择权限">
-                <el-option label="无" value=""></el-option>
-                <el-option label="管理员" value="管理员"></el-option>
-                <el-option label="用户" value="用户"></el-option>
-              </el-select>
-            </div>
-          </div>
-          <div style="display: flex;margin: 20px 0;justify-content: right">
-            <div @click="showUser()"><el-button type="primary">搜索</el-button></div>
-            <div style="margin: 0 20px;"> <el-button type="success"  @click="addBefore();dialogFormVisible = true">新增</el-button></div>
-            <div><el-button type="info" @click="emptySearch()">清空</el-button></div>
-          </div>
+      <search-plant>
+        <div slot="inputName" style="width: 300px">
+          用户名:
         </div>
-      </div>
-      <div style="border-radius: 1em;box-shadow: 0 0 10px rgba(128,128,128,0.62);width: 90%;height: auto;margin:60px auto;">
+        <div slot="input">
+          <input v-model="search.userName" class="superInput" placeholder="请输入姓名"></input>
+        </div>
+        <div slot="selectName">
+          权限:
+        </div>
+        <div slot="select">
+          <el-select v-model="search.role" placeholder="请选择权限">
+            <el-option label="无" value=""></el-option>
+            <el-option label="管理员" value="管理员"></el-option>
+            <el-option label="用户" value="用户"></el-option>
+          </el-select>
+        </div>
+        <div slot="button" style="display: flex">
+          <button-collection>
+            <div slot="check" @click="showUser()" >搜索</div>
+            <div slot="modify"  @click="addBefore();dialogFormVisible = true">新增</div>
+            <div slot="delete"  @click="emptySearch()">清空</div>
+          </button-collection>
+        </div>
+      </search-plant>
+      <div style="border-radius: 1em;box-shadow: 0 0 10px rgba(128,128,128,0.62);width: 99%;height: auto;margin:10px auto;">
           <el-table
             :data="userInform"
             style="width: 100%;border-radius: 1em;">
@@ -66,17 +67,12 @@
               prop="updateTime"
               label="更新时间">
             </el-table-column>
-            <el-table-column label="操作" width="200px" >
+            <el-table-column label="操作" width="260px" >
               <template slot-scope="scope" >
-                <div style="height: 60px;margin-top: 32px;">
-                  <el-button-group>
-                    <el-button
-                      icon="el-icon-edit"  @click="updBefore(scope.row.id);dialogFormVisible = true"></el-button>
-                    <el-button
-                      icon="el-icon-delete"
-                      type="danger" @click="deleteUser(scope.row.id)"></el-button>
-                  </el-button-group>
-                </div>
+                <content-button>
+                  <div slot="mainButton" @click="updBefore(scope.row.id);dialogFormVisible = true">修改</div>
+                  <div slot="otherButton" @click="deleteUser(scope.row.id)">删除</div>
+                </content-button>
               </template>
             </el-table-column>
           </el-table>
@@ -110,6 +106,7 @@
                   </el-upload>
                 </div>
                 <div v-else style="display: flex">
+<!--                  <div style="height: 200px">{{form.avatar}}</div>-->
                   <img :src="form.avatar" style="height: 200px"/>
                   <div v-if="imgUrlUpdate">
                     <el-upload
@@ -157,11 +154,15 @@
 
 <script>
 
-import {addUser, deleteUser, selectAll, selectById, updateUser} from "../net/userRequest";
-import {deleteFile, uploadImg} from "../net/bookRequest";
+import {addUser, deleteUser, selectAll, selectById, updateUser} from "../../../net/userRequest";
+import {deleteFile, uploadImg} from "../../../net/bookRequest";
+import SearchPlant from "../../../components/contant/searchPlant.vue";
+import buttonCollection from "../../../components/contant/button/buttonCollection.vue";
+import contentButton from "../../../components/contant/contentButton.vue";
 
 export default {
   name: "user",
+  components: {SearchPlant,buttonCollection,contentButton},
   data() {
     return {
       isUpload:false,
@@ -201,7 +202,6 @@ export default {
         res.append("fileName",this.form.avatar);
         await deleteFile(res);
       }
-      //把其他的也改了,这是今天内容
       this.dialogFormVisible=false;
     },
     async handlePreview(file) {

@@ -14,6 +14,12 @@ const store =new Vuex.Store({
           message: res.message,//这里的message是指什么
           type: 'success'
         });
+      }else if(res.code==="300"){
+        Vue.prototype.$notify({
+          title: '警告',
+          message: res.message,
+          type: 'warning'
+        });
       }else{
         Vue.prototype.$notify.error({
           title: '错误',

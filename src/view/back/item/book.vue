@@ -2,31 +2,32 @@
   <div style="width: 100%">
       <div style="width: 100%;">
         <div style="line-height: 100px;">
-          <div style="font-size: 30px;font-weight: bold;text-align: center">书籍管理</div>
         </div>
-        <div style="width: 90%;height: 260px;margin: 0 auto;border-radius: 1em;box-shadow: 0 0 10px rgba(128,128,128,0.62)">
-          <div style="width: 92%;margin: 0 auto;">
-            <div style="font-weight: bold;font-size: 18px;line-height: 60px">筛选:</div>
-            <div style="display: flex;width: 800px;justify-content: space-between">
-              <div style="width: 380px;">
-                <div style="height: 40px">书籍名:</div><el-input v-model="search.bookName" placeholder="请输入书名"></el-input>
-              </div>
-              <div style="margin: 0 70px ">
-                <div style="height: 40px">分类:</div>
-                <el-select v-model="search.categoryId" placeholder="请选择分类">
-                  <el-option label="无" value=""></el-option>
-                  <el-option :label="item.classicName" :value="item.id" v-for="(item,index) in classic" :key="index"></el-option>
-                </el-select>
-              </div>
-            </div>
-            <div style="display: flex;margin: 20px 0;justify-content: right">
-              <div @click="showBook()"><el-button type="primary">搜索</el-button></div>
-              <div style="margin: 0 20px;"> <el-button type="success"  @click="addBefore();dialogFormVisible = true">新增</el-button></div>
-              <div><el-button type="info" @click="emptyBookName()">清空</el-button></div>
-            </div>
+        <search-plant>
+          <div slot="inputName">
+            书籍名:
           </div>
-        </div>
-        <div style="border-radius: 1em;box-shadow: 0 0 10px rgba(128,128,128,0.62);width: 90%;height: auto;margin:60px auto;">
+          <div slot="input">
+            <input  v-model="search.bookName" class="superInput" placeholder="请输入书籍"></input>
+          </div>
+          <div slot="selectName">
+            分类:
+          </div>
+          <div slot="select">
+            <select v-model="search.categoryId" class="superSelect" placeholder="请选择权限">
+              <option label="无" value=""></option>
+              <option :label="item.classicName" :value="item.id" v-for="(item,index) in classic" :key="index"></option>
+            </select>
+          </div>
+          <div slot="button" style="display: flex">
+            <button-collection>
+            <div slot="check" @click="showBook()" >搜索</div>
+            <div slot="modify"  @click="addBefore();dialogFormVisible = true">新增</div>
+            <div slot="delete"  @click="emptyBookName()">清空</div>
+          </button-collection>
+          </div>
+        </search-plant>
+        <div style="border-radius: 1em;box-shadow: 0 0 10px rgba(128,128,128,0.62);width: 99%;height: auto;margin:10px auto;">
           <el-table
             :data="bookInform"
             style="width: 100%;border-radius: 1em;">
@@ -52,14 +53,8 @@
             width="200px">
             </el-table-column>
             <el-table-column
-              label="价格">
-              <template slot-scope="scope">
-                ¥{{scope.row.price}}
-              </template>
-            </el-table-column>
-            <el-table-column
-              prop="discount"
-              label="折扣">
+              prop="classicNames"
+              label="大分类">
             </el-table-column>
             <el-table-column
                 prop="classicName"
@@ -73,15 +68,13 @@
               prop="updateTime"
               label="更新时间">
             </el-table-column>
-            <el-table-column label="操作" width="190px" >
+            <el-table-column label="操作" width="290px" >
               <template slot-scope="scope" >
-                <div style="height: 60px;margin-top: 32px;">
-                  <el-button-group>
-                  <el-button @click="updBefore(scope.row.id);dialogFormVisible = true" icon="el-icon-edit" type="primary"></el-button>
-                  <el-button type="danger" @click="deleteBook(scope.row.id)" icon="el-icon-delete"></el-button>
-                  <el-button type="success" @click="addHot(scope.row.id)" icon="el-icon-magic-stick"></el-button>
-                  </el-button-group>
-                </div>
+                <button-collection>
+                  <div slot="modify" @click="updBefore(scope.row.id);dialogFormVisible = true">修改</div>
+                  <div slot="delete" @click="deleteBook(scope.row.id)">删除</div>
+                  <div slot="check" @click="addHot(scope.row.id)">加入热门</div>
+                </button-collection>
               </template>
             </el-table-column>
           </el-table>
@@ -123,16 +116,26 @@
                   </div>
                 </div>
               </el-form-item>
-              <el-form-item label="价格:"
-                            prop="price"
-                            :rules="[{ required: true, message: '请输入价格', trigger: 'blur'}]">
-                <el-input v-model="form.price" placeholder="请输入内容" style="margin: 10px 0;"></el-input>
-              </el-form-item>
-              <el-form-item label="折扣:"
-                            prop="discount"
-                            :rules="[{ required: true, message: '请输入折扣', trigger: 'blur'}]">
-                <el-input v-model="form.discount" placeholder="请输入内容" style="margin: 10px 0;"></el-input>
-              </el-form-item>
+            <el-form-item label="文件上传:" prop="filePath">
+<!--              :on-exceed="uploadTxtFile"-->
+              <div v-show="true">
+                <el-upload
+                  class="upload-demo"
+                  action=""
+                  :on-change="uploadTxtFile"
+
+                  :limit="1"
+                  :file-list="fileList"
+                  :auto-upload="false">
+                  <div>
+                    <el-button type="primary" size="small" icon="el-icon-upload">点击上传</el-button>
+                  </div>
+                </el-upload>
+              </div>
+              <div v-if="form.filePath">
+                <div style="width: 100%;">{{form.filePath}}</div>
+              </div>
+            </el-form-item>
               <el-form-item label="作者:"
                             prop="author"
                             :rules="[{ required: true, message: '请输入作者', trigger: 'blur'}]">
@@ -141,10 +144,17 @@
               <el-form-item label="简介:" prop="press">
                 <el-input v-model="form.press" placeholder="请输入内容" style="margin: 10px 0;"></el-input>
               </el-form-item>
+            <el-form-item label="大分类:"
+                          prop="bigCategoryId"
+                          :rules="[{ required: true, message: '请选择分类', trigger: 'blur'}]">
+              <el-select v-model="form.bigCategoryId" placeholder="请选择分类">
+                <el-option :label="item.classicNames" :value="item.id" v-for="(item,index) in classicItem" :key="index"></el-option>
+              </el-select>
+            </el-form-item>
               <el-form-item label="分类:"
                             prop="categoryId"
                             :rules="[{ required: true, message: '请选择分类', trigger: 'blur'}]">
-                <el-select v-model="form.categoryId" placeholder="请选择分类">
+                <el-select v-model="form.categoryId"   placeholder="请选择分类">
                   <el-option :label="item.classicName" :value="item.id" v-for="(item,index) in classic" :key="index"></el-option>
                 </el-select>
               </el-form-item>
@@ -163,18 +173,33 @@
 <script>
 
 
-import {addBook, deleteBook, deleteFile, selectAll, selectById, updateBook, uploadImg} from "../net/bookRequest";
-import {classicSelectAll} from "../net/classicRequest";
-import TitleItem from "../components/contant/titleItem/titleItem";
-import {addHotBook} from "../net/hotBookRequest";
+import {
+  addBook,
+  deleteBook,
+  deleteFile, deleteTxt,
+  selectAllBook,
+  updateBook,
+  uploadImg,
+  uploadTxt
+} from "../../../net/bookRequest";
+import {classicSelectAll} from "../../../net/classicRequest";
+import TitleItem from "../../../components/contant/titleItem/titleItem.vue";
+import {addHotBook} from "../../../net/hotBookRequest";
+import {classicItemSelectAll} from "../../../net/classicItemRequest";
+import fa from "element-ui/src/locale/lang/fa";
+import SearchPlant from "../../../components/contant/searchPlant.vue";
+import buttonCollection from "../../../components/contant/button/buttonCollection.vue";
+import {selectById} from "../../../net/bookRequest";
+import contentButton from "../../../components/contant/contentButton.vue";
 
 export default {
   name: "homeItem",
-  components: {TitleItem},
+  components: {TitleItem,SearchPlant,buttonCollection,contentButton},
   data(){
     return{
       isUpload:false,
       imgUrlUpdate:false,
+      fileChange:true,
       isAdd:true,
       fileList:[],
       bookInform:null,
@@ -182,16 +207,18 @@ export default {
       form:{
         bookName:'',
         imgUrl:'',
-        price:'',
-        discount:'',
         author:'',
         categoryId:'',
+        bigCategoryId:'',
         press:'',
+        filePath:'',
       },
+      oldFile:'',
       search:{
         bookName:'',
         categoryId:'',
       },
+      classicItem:'',
       classic:'',
       dialogFormVisible: false,
     }
@@ -202,7 +229,7 @@ export default {
   },
   methods:{
     async showBook(){
-      let showB = await selectAll(this.search);
+      let showB = await selectAllBook(this.search);
       if(showB.code==="200"){
         this. bookInform=showB.data;
       }
@@ -214,7 +241,6 @@ export default {
         res.append("fileName",this.form.imgUrl);
         await deleteFile(res);
       }
-      //把其他的也改了,这是今天内容
       this.dialogFormVisible=false;
     },
     async handlePreview(file) {
@@ -223,7 +249,17 @@ export default {
       this.form.imgUrl=(await uploadImg(req)).data;
       this.isUpload=true;
     },
+    async uploadTxtFile(file){
+      let req = new FormData();
+      req.append("file",file.raw);
+      this.form.filePath=(await uploadTxt(req)).data;
+      this.$refs.upload.clearFiles();
+      this.fileChange=false;
+
+    },
     async addBook(){
+      let arr=this.form.categoryId.toString();
+      this.form.categoryId=arr;
       let addB = await addBook(this.form);
       if(addB.code==="200"){
         this.bookInform=addB.data;
@@ -248,26 +284,33 @@ export default {
       this.$store.commit("tip",await addHotBook({bookId: id}));
     },
     async updBefore(id){
+      this.fileList=[],
       //覆盖原有表单
-      console.log(id);
       this.form=(await selectById({id:id})).data;
+      this.oldFile=this.form.filePath
+      if(this.form.filePath!=null){
+        this.fileChange=false;
+      }else {
+        this.fileChange=true;
+      }
       //修改当前状态为修改
       this.isAdd=false;
+      this.classicItem=(await classicItemSelectAll({})).data;
       this.imgUrlUpdate=true;
     },
-    addBefore(){
+    async addBefore(){
       //清空表单
       this.form={
         bookName:'',
         imgUrl:'',
-        price:'',
-        discount:'1',
         author:'',
         categoryId:'',
         press:'自行脑补',
+        filePath: '',
       };
       //修改当前状态为添加
       this.isAdd=true;
+      this.classicItem=(await classicItemSelectAll({})).data;
     },
     verify(){
       let res={
@@ -276,12 +319,6 @@ export default {
       }
       if(this.form.bookName===""){
         res.message+="书名"
-      }
-      if(this.form.price===""){
-        res.message+="价格"
-      }
-      if(this.form.discount===""){
-        res.message+="折扣"
       }
       if(this.form.author===""){
         res.message+="作者"
@@ -296,15 +333,18 @@ export default {
       this.$store.commit("tip",res);
       return false;
     },
-    operateBook(){//按钮当前流程控制器
+    async operateBook(){//按钮当前流程控制器
       if(this.isAdd){
         if(this.verify()){
           this.dialogFormVisible = false;
-          this.addBook();
+          await this.addBook();
         }
       }else{
+        let res=new FormData();
+        res.append("fileName",this.oldFile);
+        await deleteTxt(res);
         this.dialogFormVisible = false;
-        this.updBook();
+        await this.updBook();
       }
       this.imgUrlUpdate=false;
     },
